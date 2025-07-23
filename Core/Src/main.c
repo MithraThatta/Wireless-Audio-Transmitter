@@ -140,17 +140,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	if(print1 == 1)
-	{
-		HAL_UART_Transmit_DMA(&huart1, (uint8_t*)UsbBuf, sizeof(UsbBuf)); // sends the data over usart
-		print1 = 0;
-	}
 
-	if(print2 == 1)
-	{
-		HAL_UART_Transmit_DMA(&huart1, (uint8_t*)UsbBuf2, sizeof(UsbBuf2)); // sends the data over usart
-		print2 = 0;
-	}
 
   }
   /* USER CODE END 3 */
@@ -456,16 +446,15 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 	}
 
  //left shift each bit by 3 to increase gain but avoid chance of clipping
-	/*
-	 * for(int i = 0;i<48;i++)
+
+	  for(int i = 0;i<48;i++)
  	 {
-	 	 UsbBuf[i] = (UsbBuf[i] <<2);
+	 	 UsbBuf[i] = (UsbBuf[i] <<3);
  	 }
- 	 */
+
 	//data ready to send
-		//HAL_UART_Transmit(&huart1, (uint8_t*)UsbBuf, 96, HAL_MAX_DELAY);
-		//HAL_UART_Transmit_DMA(&huart1, (uint8_t*)UsbBuf, sizeof(UsbBuf)); // sends the data over usart
-		print1 = 1;
+
+		HAL_UART_Transmit_DMA(&huart1, (uint8_t*)UsbBuf, sizeof(UsbBuf)); // sends the data over usart
 
 	if(debugCount == 500)
  	 {
@@ -484,16 +473,15 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			j++;
 		}
 //left shift each bit by 2 to increase gain but avoid chance of clipping
-	/*
+
 	for(int i = 0;i<48;i++)
 		{
-			UsbBuf2[i] = (UsbBuf2[i] <<2);
+			UsbBuf2[i] = (UsbBuf2[i] <<3);
 		}
-		*/
+
 	//data ready to send
-//	HAL_UART_Transmit(&huart1, (uint8_t*)UsbBuf2, 96, HAL_MAX_DELAY);
-			//HAL_UART_Transmit_DMA(&huart1, (uint8_t*)UsbBuf2, sizeof(UsbBuf2)); // sends the data over usart
-		print2 = 1;
+		HAL_UART_Transmit_DMA(&huart1, (uint8_t*)UsbBuf2, sizeof(UsbBuf2)); // sends the data over usart
+
 
 	if(debugCount2 == 1000)
 	{
