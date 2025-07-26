@@ -8,9 +8,9 @@ An extensive passive front end analog circuit is used for ensuring received audi
 - **Analog front end**
   - 3.5 mm female audio jack for audio input from any source
   - AC coupling(10 µF) capacitor to block DC voltage
-  - 20 Hz single‑pole low‑pass (827 Ω/10 nF) to block frequencies below the audio band lower threshold 
+  - ~1 Hz single‑pole high‑pass (10 µF/100 kΩ) to block stray frequencies, input jack noise, etc
   - 1.65 volt rebiasing via 2 100kΩ resistors to fit audio within range of ADC(0 to 3.3 volts)
-  - 24 kHz single‑pole high‑pass (10 µF/100 kΩ) for anti aliasing, adherence to Nyquist Frequency rule
+  - 19 KHz single‑pole low‑pass (827 Ω/10 nF) to block frequencies above the audio band and nyquist frequency
   - Unity‑gain op-amp buffer to isolate the ADC input and its associated current draw surges
   - Voltage amplifying op-amp to amplify audio(voltage) swings in softer audio, such as songs and speeches to cut through static
   - Link to circuit: https://rb.gy/817adk 
@@ -27,7 +27,7 @@ An extensive passive front end analog circuit is used for ensuring received audi
     <img width="486" height="439" alt="image" src="https://github.com/user-attachments/assets/faf94b69-d7c5-457a-b736-1667df30e61a" />
 
  
-- **ESP32‑S3**  
+- **Adafruit Metro (ESP32‑S3)**  
   - Sets up softAP Wifi network
   - Listens on hardware Serial1 @ 3 Mbps
   - Reassembles 96 B frames, repacks to int16_t, broadcasts on UDP port 8000
@@ -37,3 +37,24 @@ An extensive passive front end analog circuit is used for ensuring received audi
 
 ##  In Depth
 - **Analog front end**
+  - The biggest initial challenges to work with were having to ensure the input audio was within the audio range (20hz to 20khz), removing the DC offset
+    of audio data and making it ADC readable, and adhering to the Nyquist frequency rule-because I was sampling at 48 khz, I had to ensure that
+    my audio didn't exceed 24 khz, or else the audio would "fold back" into lower frequencies and distort the existing audio. I realized I could just
+    use a series capacitor to remove any DC offset due to a capacitors impedence to DC voltage in an AC circuit. I then "raised" that AC voltage up to
+    a base DC voltage of 1.65 volts with a voltage divider, as the STM's ADC has a range of 0 to 3.3 volts. Rebiasing the AC voltage to 1.65 volts allows
+    for the ADC to read maximal AC swing without the risk of clipping.
+
+    I had unknowingly also made a high pass filter with my rebiasing and AC coupling. At high frequencies, the capacitor has a low impedence, and allows
+    the output voltage to be almost identical to the input voltage. At low frequencies, the capacitor's impedence is high, blocking the input voltage
+    more and more as the frequency decreases. This blocks stray current, noise, and other random sounds/heat that can disrupt the signal.
+
+    After this, I built a simple low pass filter for anti aliasing, or making sure that audio at high frequencies above the Nyquist rate don't fold in
+    to audio at lower frequencies, which would distort the audio. I did this by "flipping" the high pass filter. A resistor was in series with the voltage,
+    and a capacitor offered a path for the voltage into ground. When frequency is high, the capacitor's low impedence means that the high frequency voltage
+    goes straight into ground, protecting the rest of the circuit by blocking it. When frequency is lower than the cutoff frequency, the capacitor
+    has relatively high impedence, meaning the voltage has no discharge path into ground and "proceeds" into the next stage of the circuit.
+
+    For both filters, the cutoff frequencies can be calculated by the following: _Cutoff Frequency = 1/(2pi*R*C)_
+
+    
+  - 
