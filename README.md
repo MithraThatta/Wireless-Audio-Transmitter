@@ -68,5 +68,29 @@ An extensive passive front end analog circuit is used for ensuring received audi
     0.9 volts. Although the static is still present, softer audio is discernible and understandable, and I can reliably use it to play instrumental songs.
 
 
-- **Analog front end**
-- 
+- **Software**
+  - **Initial Plan:** This was relatively simple compared th the analog circuit. On the STM, Timer 6 was configured to trigger at 48khz and raise an update event flag.
+    ADC1, then, was configured to make a reading at every timer 6 update event, and, via DMA, push it to a circular memory uint16_t buffer ADCBuf. When ADCBuf is half full or      completely full, the respective DMA callback triggers. In these callbacks, the appropriate half of ADCBuf is rebiased by subtracting 2048(equivalent to ADC reading of
+    1.65 volts) and packaged into a 48 int16_t buffer(UsbBuf or UsbBuf2) to send. Meanwhile, as this was done via a separate DMA channel, the ADC-DMA pipeline
+    would continue to run, and the other half of ADCBuf would fill while the current half was being processed. Similarly, while one buffer, UsbBuf was sending,
+    UsbBuf2 would be being processed by the callback. This ensures that the audio processing never stops. 
+
+    I had originally intended for this project to be an analog to USB audio adapter, and wanted to stream the audio to my laptop via USB. the USB breakout boards I had
+    all proved faulty though, so I ended up having to think of a workaround, which either had to be wifi or bluetooth. As my only other MCU, the ESP32S3, does not
+    support bluetooth audio streaming, I had to use wifi. Using ArduinoIDE for a quick prototype, I had the ESP32S3 open its own softAP wifi network and open a UDP
+    port(8000) within it. Everytime the ESP32S3 received a 96 byte buffer over USART, it would repackage it from serial back into buffer form and stream it to the UDP port.
+
+    
+  - **After Trials and Debugging:** My STM and ESP32S3 boards communicated via USART, and based on the number of dropped audio packets and buffering,
+    it was very clear that my initial USART rate of 2Mb/s baud was way too low. Even though the transfer of a 96 byte buffer takes less than half a millisecond,
+    it still didn't leave enough time for the ESP32S3 to process it in time, leading to the serial buffer accumulating and the ESP32S3 "lagging", dropping
+    packets regularly. I somewhat fixed this by upping the baud rate to 3Mb/s, but it was clear that the ESP32S3 board was still struggling due to
+    how hot it would get and the persistent buffering in the audio playback. Additionally, the wifi stack was getting constrained due to how fast the ESP32S3 had to
+    receive, repackage, and broadcast audio data, and my laptop would randomly get booted from the wifi network while listening to audio. I fixed this by
+    including yield() after every CPU intensive task, which alleviated the problem but also introduced more buffering to the stream.
+
+    It became clear that these were limitations of the ArduinoIDE, as no matter how bare bones the code was, the buffering continued. I am currently working on
+    rewriting the Arduino code in Espressif IDE to "bare-metal" the ESP32S3 and make use of the dual cores, something which was very finnicky when I tried
+    doing it in ArduinoIDE.
+
+    
