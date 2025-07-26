@@ -12,7 +12,8 @@ An extensive passive front end analog circuit is used for ensuring received audi
   - 1.65 volt rebiasing via 2 100kΩ resistors to fit audio within range of ADC(0 to 3.3 volts)
   - 24 kHz single‑pole high‑pass (10 µF/100 kΩ) for anti aliasing, adherence to Nyquist Frequency rule
   - Unity‑gain op-amp buffer to isolate the ADC input and its associated current draw surges
-  - Voltage amplifying op-amp to amplify audio(voltage) swings in softer audio, such as songs and speeches
+  - Voltage amplifying op-amp to amplify audio(voltage) swings in softer audio, such as songs and speeches to cut through static
+  - Link to circuit: https://rb.gy/817adk 
     <img width="908" height="537" alt="image" src="https://github.com/user-attachments/assets/f873230e-8bbc-4cbe-b7ad-9086f6fec328" />
 
 
@@ -23,6 +24,8 @@ An extensive passive front end analog circuit is used for ensuring received audi
   - On half/full DMA complete: Callbacks rebias (–2048) to 0v for audio standard, apply optional 8x digital gain, and store audio data in int 16_t UsbBuf or UsbBuf2 buffer
         - UsbBuf/UsbBuf2 hold 48 readings-1ms of audio data. ADCBuf holds 96 readings. While one UsbBuf fills, the ADC fills the other half of ADCBuf uninterrupted
   - UsbBuf/UsbBuf2 are then transferred via DMA to the UART1 TX pin, which sends the buffer to the ESP32S3
+    <img width="486" height="439" alt="image" src="https://github.com/user-attachments/assets/faf94b69-d7c5-457a-b736-1667df30e61a" />
+
  
 - **ESP32‑S3**  
   - Sets up softAP Wifi network
