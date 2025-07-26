@@ -33,3 +33,7 @@ An extensive passive front end analog circuit is used for ensuring received audi
   - Reassembles 96 B frames, repacks to int16_t, broadcasts on UDP port 8000
   - Raw PCM audio stream playable in VLC (set demux to “rawaud”, sample rate 48000, signed 16‑bit, little endian, stereo=off)
         - Can also use FFmpeg or python scripts to listen to UDP port 8000 - VLC is just the simplest option
+
+
+##  In Depth
+- **Analog front end**
