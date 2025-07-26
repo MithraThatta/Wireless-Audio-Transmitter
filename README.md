@@ -13,7 +13,9 @@ An extensive passive front end analog circuit is used for ensuring received audi
   - 24 kHz single‑pole high‑pass (10 µF/100 kΩ) for anti aliasing, adherence to Nyquist Frequency rule
   - Unity‑gain op-amp buffer to isolate the ADC input and its associated current draw surges
   - Voltage amplifying op-amp to amplify audio(voltage) swings in softer audio, such as songs and speeches
+    <img width="923" height="534" alt="image" src="https://github.com/user-attachments/assets/e3445977-f1ae-40ed-9b1a-d5c492236b0b" />
 
+ 
 - **STM32F303RE (Nucleo‑64)**  
   - Timer‑triggered ADC @ 48 KHz, 12 bit  
   - ADC-DMA pipeline stores ADC readings in a 96 uint16_t ping pong circular buffer, ADCBuf
