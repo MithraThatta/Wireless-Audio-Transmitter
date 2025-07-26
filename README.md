@@ -37,7 +37,7 @@ An extensive passive front end analog circuit is used for ensuring received audi
 
 ##  In Depth
 - **Analog front end**
-  - The biggest initial challenges to work with were having to ensure the input audio was within the audio range (20hz to 20khz), removing the DC offset
+  - **Initial Plan:  **The biggest initial challenges to work with were having to ensure the input audio was within the audio range (20hz to 20khz), removing the DC offset
     of audio data and making it ADC readable, and adhering to the Nyquist frequency rule-because I was sampling at 48 khz, I had to ensure that
     my audio didn't exceed 24 khz, or else the audio would "fold back" into lower frequencies and distort the existing audio. I realized I could just
     use a series capacitor to remove any DC offset due to a capacitors impedence to DC voltage in an AC circuit. I then "raised" that AC voltage up to
