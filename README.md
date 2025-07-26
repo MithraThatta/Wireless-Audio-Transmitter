@@ -1,6 +1,8 @@
 # Wireless-Audio-Transmitter
 Takes in a 3.5mm jack as an analog audio input and outputs the recorded audio on a UDP port on a wifi network, using an STMF303RE for digitizing/processing audio data and an ESP32S3 to broadcast to wifi. Communication between the two MCUs is done via a high speed USART line.
 
+An extensive passive front end analog circuit is used for ensuring received audio is within the 20hz to 20khz audio band(via low pass filter and anti aliasing by high pass filter) and ensuring that the ADC does not disrupt the signal when reading via a unity gain op amp. A second op amp is used as a voltage amplifier, to boost the sound of audio coming from things like songs and speeches(which have sounds coming from various sources at varying intensities), above the noise created by the limited range of the ADC and the thermal/resistor noise from the passive front end circuit.
+
 Audio is playable via VLC or other UDP capable audio players, such as FFmpeg. 
 To play audio via VLC,
   1. Press Media, Open network stream. For network URL, enter: udp://@192.168.4.1:8000
@@ -9,7 +11,6 @@ To play audio via VLC,
   4. In the box labelled "Edit Options', type : udp://@192.168.4.1:8000 :demux=rawaud :rawaud-samplerate=48000 :rawaud-channels=1 :rawaud-width=16
   5. Press play to hear the audio. Make sure you're connected to the ESP32S3's wifi network
 
-An extensive passive front end analog circuit is used for ensuring received audio is within the 20hz to 20khz audio band(via low pass filter and anti aliasing by high pass filter) and ensuring that the ADC does not disrupt the signal when reading via a unity gain op amp. A second op amp is used as a voltage amplifier, to boost the sound of audio coming from things like songs and speeches(which have sounds coming from various sources at varying intensities), above the noise created by the limited range of the ADC and the thermal/resistor noise from the passive front end circuit.
 
 ##  Features
 
