@@ -1,5 +1,5 @@
 # Wireless-Audio-Transmitter
-Takes in a 3.5mm jack as an analog audio input and outputs the recorded audio on a UDP port on a wifi network, using an STMF303RE for digitizing/processing audio data and an ESP32S3 to broadcast to wifi. Communication between the two MCUs is done via a high speed USART line.
+Takes in a 3.5mm jack as an analog audio input and outputs the recorded audio on a UDP port on a wifi network, using an STMF303RE for digitizing/processing audio data and an ESP32S3 to broadcast mono audio to wifi. Communication between the two MCUs is done via a high speed USART line.
 
 An extensive passive front end analog circuit is used for ensuring received audio is within the 20hz to 20khz audio band(via low pass filter and anti aliasing by high pass filter) and ensuring that the ADC does not disrupt the signal when reading via a unity gain op amp. A second op amp is used as a voltage amplifier, to boost the sound of audio coming from things like songs and speeches(which have sounds coming from various sources at varying intensities), above the noise created by the limited range of the ADC and the thermal/resistor noise from the passive front end circuit.
 
@@ -100,6 +100,6 @@ To play audio via VLC,
 
     It became clear that these were limitations of the ArduinoIDE, as no matter how bare bones the code was, the buffering continued. I am currently working on
     rewriting the Arduino code in Espressif IDE to "bare-metal" the ESP32S3 and make use of the dual cores, something which was very finnicky when I tried
-    doing it in ArduinoIDE.
+    doing it in ArduinoIDE. Once this is done, i plan to add stereo audio support.
 
     
