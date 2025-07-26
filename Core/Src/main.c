@@ -1,19 +1,16 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
+This STM board runs 2 main pipelines-the ADC to DMA pipeline, and the DMA to USART (to ESP32S3) pieline.
+The analog front end takes care of rebiasing to 1.65 volts so that the ADC can read the full swing of analog data, so the ADC is used to
+digitize the analog audio. In order to sample at a proper 48khz, timer 6 is set up to trigger at 48 khz, and ADC1 is configured to make a reading at
+every timer 6 update event. Every ADC reading is sent to ADCBuf via the DMA module. ADCBuf is size 96, meaning it can hold 2 full samples, where
+each sample is a ms of audio data. I have DMA callbacks for when the ADCBuf is half full and completely full. When ADCBuf is half full, it is rebiased
+back to 0volts +- 1 volt and copied to UsbBuf while the other half of ADCBuf is filling, and when ADCBuf is completely full, the same process takes place for
+UsbBuf2. In both callbacks, after the respective UsbBuf is full, the callback initiates a DMA to USART transmission and returns. THe CPU involvement is
+minimal as to prevent jitter.
+
+The project was originally meant to be an analog audio to USB audio adapter, hence why the transmitted buffers are UsbBuf and UsbBuf2.
+When my USB breakout board proved faulty, I switched to using Wifi instead of USB, but forgot to update the buffer names.
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -59,14 +56,12 @@ DMA_HandleTypeDef hdma_usart2_tx;
 uint16_t adcBuf[ADC_Buf_Size]; // store 2 full samples so can process one while the other fills
 int16_t UsbBuf[48];  //this is the buffer that gets filled by the first half of the ADCBuf, it's the "ping buffer"
 int16_t UsbBuf2[48]; //this is the buffer that gets filled by the second half of the ADCBuf, it's the "pong buffer"
-volatile int debugCount = 0;
-volatile int debugCount2 = 0;
-extern int ToggleFlag;
-extern uint16_t ADCData;
-extern int ADCFlag;
-uint16_t test = 19;
-static volatile int print1;
-static volatile int print2;
+volatile int debugCount = 0;// toggles LED ON every 250 half buffer filled callbacks
+volatile int debugCount2 = 0;// toggles LED OFF every 500 full buffer filled callbacks
+
+
+
+
 
 
 
@@ -140,7 +135,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
+//while loop left empty to reduce jitter in interrupt processing and audio sampling
 
   }
   /* USER CODE END 3 */
@@ -445,18 +440,12 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 		UsbBuf[i] = adcBuf[i] -2048;  //rebias ADC readings to 0 +- 1 volt
 	}
 
- //left shift each bit by 3 to increase gain but avoid chance of clipping
-
-	  for(int i = 0;i<48;i++)
- 	 {
-	 	 UsbBuf[i] = (UsbBuf[i] <<3);
- 	 }
 
 	//data ready to send
 
 		HAL_UART_Transmit_DMA(&huart1, (uint8_t*)UsbBuf, sizeof(UsbBuf)); // sends the data over usart
 
-	if(debugCount == 500)
+	if(debugCount == 250)
  	 {
  		 GPIOA->BSRR |= (1U<<5); // debug-LED toggles on when first half of buffer filled
  		 debugCount = 0;
@@ -472,18 +461,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			UsbBuf2[j] = adcBuf[i] -2048; //rebias ADC readings to 0 +- 1 volt
 			j++;
 		}
-//left shift each bit by 2 to increase gain but avoid chance of clipping
-
-	for(int i = 0;i<48;i++)
-		{
-			UsbBuf2[i] = (UsbBuf2[i] <<3);
-		}
 
 	//data ready to send
 		HAL_UART_Transmit_DMA(&huart1, (uint8_t*)UsbBuf2, sizeof(UsbBuf2)); // sends the data over usart
 
 
-	if(debugCount2 == 1000)
+	if(debugCount2 == 500)
 	{
 		GPIOA->BSRR |= (1U<<21); //debug-LED toggles off when second half of buffer filled
 		debugCount2 = 0;
