@@ -55,6 +55,18 @@ An extensive passive front end analog circuit is used for ensuring received audi
     has relatively high impedence, meaning the voltage has no discharge path into ground and "proceeds" into the next stage of the circuit.
 
     For both filters, the cutoff frequencies can be calculated by the following: _Cutoff Frequency = 1/(2pi*R*C)_
-
+    After these filters, I began the software component of the project, and mostly left the analog circuit alone. 
     
-  - 
+  - **After Trials and Debugging:**  During testing, no matter how snappy my software code was, and even after removing any digital gain, the audio
+    was incredibly low quality. Outside of 20-20Khz sin waves, I couldn't discern anything that was playing-everything sounded like static. After consulting
+    stack overflow and some other threads, I realized that my AC voltage was only swinging about 0.6 volts arond my DC voltage of 1.65 volts-which meant I was
+    underusing my ADC. The nucleo board's onboard ADC has 12 bit clarity from 0-3.3 volts, and currently my passive front end only gave it a signal swinging from
+    1 volt to 2.2 volts-which meant I was using just a third of the ADC's range, greatly diminshing audio quality. Additionally, most audio tends to be quieter
+    and has a variety of tones all playing at once, which I was "mushing" all together into a single reading, which contributed to the distortion and static. The ADC,
+    when reading, can also disrupt the front end circuit due to its current draw. To alleviate this, I connected 2 op amps to the end of the circuit:
+    one wired as a voltage buffer, and one wired as a voltage amplifier(1.5x). This isolated the ADC's current draw from the front end and increased the AC swing to about
+    0.9 volts. Although the static is still present, softer audio is discernible and understandable, and I can reliably use it to play instrumental songs.
+
+
+- **Analog front end**
+- 
