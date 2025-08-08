@@ -76,6 +76,10 @@ To play audio via VLC,
     one wired as a voltage buffer, and one wired as a voltage amplifier(1.5x). This isolated the ADC's current draw from the front end and increased the AC swing to about
     0.9 volts. Although the static is still present, softer audio is discernible and understandable, and I can reliably use it to play instrumental songs.
 
+    After further research, I believe some of the static may be due to electromagnetic interference between the resistors and wires, which are all placed in very close
+    proximity. Although the op-amp at the end of the front end is high-Z and minimizes current flow, the actual filters in the beginning have a significant amount of
+    current passing through them, and the resulting magnetic field and flux might be causing a lot of the static.
+
 
 - **Software**
   - **Initial Plan:** This was relatively simple compared th the analog circuit. On the STM, Timer 6 was configured to trigger at 48khz and raise an update event flag.
